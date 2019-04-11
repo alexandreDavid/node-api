@@ -18,6 +18,7 @@ CREATE TABLE public.dashboard
     description character varying COLLATE pg_catalog."default",
     user_id character varying COLLATE pg_catalog."default" NOT NULL,
     layout json,
+    widgets json[],
     CONSTRAINT dashboard_pkey PRIMARY KEY (id)
 )
 WITH (

@@ -28,9 +28,9 @@ exports.getDashboardById = async (request, response) => {
 
 // Add a new dashboard
 exports.addDashboard = async (request, response) => {
-  const { title, description, layout } = request.body
+  const { title, description, layout, widgets } = request.body
 
-  pool.query('INSERT INTO dashboard (user_id, title, description, layout) VALUES ($1, $2, $3, $4) RETURNING id', [request.user.sub, title, description, layout], (error, results) => {
+  pool.query('INSERT INTO dashboard (user_id, title, description, layout, widgets) VALUES ($1, $2, $3, $4, $5) RETURNING id', [request.user.sub, title, description, layout, widgets], (error, results) => {
     if (error) {
       throw error
     }
@@ -41,11 +41,11 @@ exports.addDashboard = async (request, response) => {
 // // Update an existing dashboard
 exports.updateDashboard = async (request, response) => {
   const id = parseInt(request.params.id)
-  const { title, description } = request.body
+  const { title, description, layout, widgets } = request.body
 
   pool.query(
-    'UPDATE dashboard SET title = $1, description = $2 WHERE user_id = $3 AND id = $4',
-    [title, description, request.user.sub, id],
+    'UPDATE dashboard SET title = $1, description = $2, layout = $3, widgets = $4 WHERE user_id = $5 AND id = $6',
+    [title, description, layout, widgets, request.user.sub, id],
     (error, results) => {
       if (error) {
         throw error
