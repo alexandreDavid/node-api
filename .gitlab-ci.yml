@@ -1,7 +1,9 @@
 # This file is a template, and might need editing before it works on your project.
 # Official framework image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/node/tags/
-image: node:latest
+image: docker:latest
+services:
+  - docker:dind
 
 # This folder is cached between builds
 # http://docs.gitlab.com/ce/ci/yaml/README.html#cache
@@ -9,17 +11,34 @@ cache:
   paths:
   - node_modules/
 
-test:
-  stage: test
+deploy docker:
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+  stage: build
   script:
-    - npm install
-    - npm test
+    - apk add --no-cache curl
+    - curl https://gitlab.dfms.co.uk/WP6000/config/raw/master/dfms-management/$CI_COMMIT_REF_NAME/.env --output .env
+    - docker build --pull -t dfmscloud/dfms-management:$CI_COMMIT_REF_NAME .
+    - docker push dfmscloud/dfms-management:$CI_COMMIT_REF_NAME
+  only:
+    - dev
+    - master
 
-pack:
+deploy kube:
   stage: deploy
   script:
-    - npm install
-    - npm pack
-  artifacts:
-    paths:
-    - ./*.tgz
+    - apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl
+    - mv ./kubectl /usr/local/bin/kubectl
+    - kubectl config set-cluster nosebit --server="$KUBE_URL" --insecure-skip-tls-verify=true
+    - kubectl config set-credentials admin --token="$KUBE_TOKEN"
+    - kubectl config set-context default --cluster=nosebit --user=admin
+    - kubectl config use-context default
+    - kubectl apply -f https://gitlab.dfms.co.uk/WP6000/config/raw/master/dfms-management/$CI_COMMIT_REF_NAME/kube-deploy.yml
+    - curl https://gitlab.dfms.co.uk/WP6000/config/raw/master/dfms-management/$CI_COMMIT_REF_NAME/kube-deploy.yml --output kube-deploy.tpl.yml
+    - sed 's/_VERSION_/'"$CI_COMMIT_SHA"'/g' kube-deploy.tpl.yml > kube-deploy.yml;
+    - kubectl apply -f kube-deploy.yml
+  only:
+    - dev
+    - master
