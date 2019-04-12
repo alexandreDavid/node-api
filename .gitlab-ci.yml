@@ -35,7 +35,6 @@ deploy kube:
     - kubectl config set-credentials admin --token="$KUBE_TOKEN"
     - kubectl config set-context default --cluster=nosebit --user=admin
     - kubectl config use-context default
-    - kubectl apply -f https://gitlab.dfms.co.uk/WP6000/config/raw/master/dfms-management/$CI_COMMIT_REF_NAME/kube-deploy.yml
     - curl https://gitlab.dfms.co.uk/WP6000/config/raw/master/dfms-management/$CI_COMMIT_REF_NAME/kube-deploy.yml --output kube-deploy.tpl.yml
     - sed 's/_VERSION_/'"$CI_COMMIT_SHA"'/g' kube-deploy.tpl.yml > kube-deploy.yml;
     - kubectl apply -f kube-deploy.yml
