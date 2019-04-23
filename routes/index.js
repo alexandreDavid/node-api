@@ -7,5 +7,6 @@ router.get('/', function(req, res, next) {
 });
 
 router.use('/dashboards', require('./dashboards'))
+router.use('/basemaps', require('./basemaps'))
 
 module.exports = router;
