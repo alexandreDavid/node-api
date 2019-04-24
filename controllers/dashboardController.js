@@ -59,7 +59,7 @@ exports.updateDashboard = async (request, response) => {
 exports.deleteDashboard = async (request, response) => {
   const id = parseInt(request.params.id)
 
-  pool.query('DELETE FROM dashboard WHERE user_id = $2 AND id = $1', [request.user.sub, id], (error, results) => {
+  pool.query('DELETE FROM dashboard WHERE user_id = $1 AND id = $2', [request.user.sub, id], (error, results) => {
     if (error) {
       throw error
     }

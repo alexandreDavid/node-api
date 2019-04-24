@@ -3,7 +3,7 @@ const pool = require('../db/db')
 
 // // Get all basemaps
 exports.getBasemaps = async (request, response) => {
-  pool.query('SELECT * FROM basemap', (error, results) => {
+  pool.query('SELECT * FROM basemap order by id', (error, results) => {
     if (error) {
       throw error
     }
