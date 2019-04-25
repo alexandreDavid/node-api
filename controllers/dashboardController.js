@@ -3,7 +3,7 @@ const pool = require('../db/db')
 
 // // Get all dashboards
 exports.getDashboards = async (request, response) => {
-  pool.query('SELECT * FROM dashboard WHERE user_id = $1', [request.user.sub], (error, results) => {
+  pool.query('SELECT * FROM dashboard WHERE user_id = $1 order by id', [request.user.sub], (error, results) => {
     if (error) {
       throw error
     }
@@ -30,11 +30,11 @@ exports.getDashboardById = async (request, response) => {
 exports.addDashboard = async (request, response) => {
   const { title, description, layout, widgets } = request.body
 
-  pool.query('INSERT INTO dashboard (user_id, title, description, layout, widgets) VALUES ($1, $2, $3, $4, $5) RETURNING id', [request.user.sub, title, description, layout, widgets], (error, results) => {
+  pool.query('INSERT INTO dashboard (user_id, title, description, layout, widgets) VALUES ($1, $2, $3, $4, $5) RETURNING id, title, description, layout, widgets', [request.user.sub, title, description, layout, widgets], (error, results) => {
     if (error) {
       throw error
     }
-    response.status(201).send(`User added with ID: ${results.rows[0].id}`)
+    response.status(201).send(results.rows[0])
   })
 }
 
