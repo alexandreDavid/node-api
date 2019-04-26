@@ -7,6 +7,8 @@ router.get('/', function(_req, res) {
 });
 
 router.use('/areas', require('./areas'))
+router.use('/user', require('./user'))
+router.use('/dashboards', require('./dashboards'))
 router.use('/basemaps', require('./basemaps'))
 router.use('/dashboards', require('./dashboards'))
 router.use('/resources', require('./resources'))
