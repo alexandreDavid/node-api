@@ -77,3 +77,25 @@ TABLESPACE pg_default;
 
 ALTER TABLE public.basemap_user
     OWNER to postgres;
+
+-- Table: public.area
+
+-- DROP TABLE public.area;
+
+CREATE TABLE public.area
+(
+    id integer NOT NULL DEFAULT nextval('area_id_seq'::regclass),
+    user_id character varying COLLATE pg_catalog."default" NOT NULL,
+    name character varying COLLATE pg_catalog."default" NOT NULL,
+    type character varying COLLATE pg_catalog."default" NOT NULL,
+    id_area integer,
+    geom json[],
+    CONSTRAINT area_pkey PRIMARY KEY (id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.area
+    OWNER to postgres;

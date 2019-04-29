@@ -50,7 +50,7 @@ exports.updateDashboard = async (request, response) => {
       if (error) {
         throw error
       }
-      response.status(200).send(`User modified with ID: ${id}`)
+      response.status(200).send(`Dashboard modified with ID: ${id}`)
     }
   )
 }
@@ -63,6 +63,6 @@ exports.deleteDashboard = async (request, response) => {
     if (error) {
       throw error
     }
-    response.status(200).send(`User deleted with ID: ${id}`)
+    response.status(200).send(`Dashboard deleted with ID: ${id}`)
   })
 }
