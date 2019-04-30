@@ -7,7 +7,8 @@ router.get('/', function(req, res, next) {
 });
 
 router.use('/areas', require('./areas'))
-router.use('/dashboards', require('./dashboards'))
 router.use('/basemaps', require('./basemaps'))
+router.use('/dashboards', require('./dashboards'))
+router.use('/settings', require('./settings'))
 
 module.exports = router;
