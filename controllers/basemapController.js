@@ -1,58 +1,44 @@
-// Get Database pool
-const pool = require('../db/db')
+// Get Database models
+const models = require('../models')
 
 // // Get all basemaps
-exports.getBasemaps = async (request, response) => {
-  pool.query('SELECT * FROM basemap order by id', (error, results) => {
-    if (error) {
-      throw error
-    }
-    response.status(200).json(results.rows)
-  })
+exports.getBasemaps = async (request, response, next) => {
+  try {
+    const results = await models.Basemap.findAll({ order: [['id']] })
+    response.status(200).json(results)
+  } catch (e) {
+    next(e)
+  }
 }
 
 // Get the basemap of the user
-exports.getBasemap = async (request, response) => {
-  pool.query('SELECT * FROM basemap WHERE id = (SELECT basemap_id FROM basemap_user where user_id = $1)', [request.user.sub], (error, results) => {
-    if (error) {
-      throw error
+exports.getBasemap = async (request, response, next) => {
+  try {
+    let user = await models.User.findOne({ where: { id: request.user.id }, include: [ models.Basemap ] })
+    // user = user.get(0)
+
+    if (!user.basemap) {
+      user.basemap = await models.Basemap.findOne({ where: {isdefault: true} })
+      user.basemapId = user.basemap.id
+      await user.save({fields: ['basemapId']})
     }
-    if (results.rows.length === 1) {
-      response.status(200).json(results.rows[0])
-    } else {
-      // If no result, we take the default basemap
-      pool.query('SELECT * FROM basemap WHERE isdefault is true', (error, results) => {
-        if (error) {
-          throw error
-        }
-        if (results.rows.length === 1) {
-          const defaultBasemap = results.rows[0]
-          pool.query('INSERT INTO basemap_user (user_id, basemap_id) VALUES ($1, $2)', [request.user.sub, defaultBasemap.id], (error, results) => {
-            if (error) {
-              throw error
-            }
-            response.status(200).json(defaultBasemap)
-          })
-        } else {
-          response.status(404).send({ message: `Basemap for user ${request.user.sub} not found.` });
-        }
-      })
-    }
-  })
+
+    response.status(200).json(user.basemap)
+  } catch (e) {
+    next(e)
+  }
 }
 
 // // Update the user's basemap
-exports.updateBasemap = async (request, response) => {
-  const id = parseInt(request.params.id)
+exports.updateBasemap = async (request, response, next) => {
+  try {
+    const id = parseInt(request.params.id)
+    let user = await models.User.findOne({ where: { id: request.user.id }})
+    user.basemapId = parseInt(request.params.id)
+    await user.save({fields: ['basemapId']})
 
-  pool.query(
-    'UPDATE basemap_user SET basemap_id = $1 WHERE user_id = $2',
-    [id, request.user.sub],
-    (error, results) => {
-      if (error) {
-        throw error
-      }
-      response.status(200).send(`User modified with ID: ${id}`)
-    }
-  )
+    response.status(200).json(`User basemap modified with ID: ${id}`)
+  } catch (e) {
+    next(e)
+  }
 }

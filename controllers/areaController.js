@@ -1,68 +1,62 @@
-// Get Database pool
-const pool = require('../db/db')
+// Get Database models
+const models = require('../models')
 
 // // Get all area
-exports.getAreas = async (request, response) => {
-  pool.query('SELECT * FROM area WHERE user_id = $1 order by id', [request.user.sub], (error, results) => {
-    if (error) {
-      throw error
-    }
-    response.status(200).json(results.rows)
-  })
+exports.getAreas = async (request, response, next) => {
+  try {
+    const results = await models.Area.findAll({ where: { userId: request.user.id }, attributes: { exclude: ['userId'] }})
+    response.status(200).json(results)
+  } catch (e) {
+    next(e)
+  }
 }
 
 // Get single area by ID
-exports.getAreaById = async (request, response) => {
+exports.getAreaById = async (request, response, next) => {
   const id = parseInt(request.params.id)
-  pool.query('SELECT * FROM area WHERE user_id = $1 AND id = $2', [request.user.sub, id], (error, results) => {
-    if (error) {
-      throw error
-    }
-    if (results.rows.length === 1) {
-      response.status(200).json(results.rows[0])
-    } else {
-      return response.status(404).send({ message: `Area ${id} not found.` });
-    }
-  })
+  try {
+    const results = await models.Area.findOne({ where: {id, userId: request.user.id}, attributes: { exclude: ['userId'] }})
+    response.status(200).json(results)
+  } catch (e) {
+    next(e)
+  }
 }
 
 // Add a new area
-exports.addArea = async (request, response) => {
-  const { name, type, geom, id_area } = request.body
-
-  pool.query('INSERT INTO area (user_id, name, type, geom, id_area) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, type, geom, id_area', [request.user.sub, name, type, geom, id_area], (error, results) => {
-    if (error) {
-      throw error
-    }
-    response.status(201).send(results.rows[0])
-  })
+exports.addArea = async (request, response, next) => {
+  try {
+    const { name, type, geom, idArea } = request.body
+    const area = await models.Area.create({ name, type, geom, idArea, userId: request.user.id })
+    response.status(200).json(await models.Area.findOne({ where: {id: area.id, userId: request.user.id}, attributes: { exclude: ['userId'] }}))
+  } catch (e) {
+    next(e)
+  }
 }
 
 // // Update an existing area
-exports.updateArea = async (request, response) => {
-  const id = parseInt(request.params.id)
-  const { name, type, geom, id_area } = request.body
+exports.updateArea = async (request, response, next) => {
+  try {
+    const id = parseInt(request.params.id)
+    const { name, type, geom, idArea } = request.body
 
-  pool.query(
-    'UPDATE area SET name = $1, type = $2, geom = $3, id_area = $4 WHERE user_id = $5 AND id = $6',
-    [name, type, geom, id_area, request.user.sub, id],
-    (error, results) => {
-      if (error) {
-        throw error
-      }
-      response.status(200).send(`Area modified with ID: ${id}`)
-    }
-  )
+    const area = await models.Area.findOne({ where: {id, userId: request.user.id}, attributes: { exclude: ['userId'] }})
+    const results = await area.update({ name, type, geom, idArea })
+
+    response.status(200).send(results)
+  } catch (e) {
+    next(e)
+  }
 }
 
 // // Delete a area
 exports.deleteArea = async (request, response) => {
-  const id = parseInt(request.params.id)
+  try {
+    const id = parseInt(request.params.id)
 
-  pool.query('DELETE FROM area WHERE user_id = $1 AND id = $2', [request.user.sub, id], (error, results) => {
-    if (error) {
-      throw error
-    }
-    response.status(200).send(`Area deleted with ID: ${id}`)
-  })
+    await models.Area.destroy({ where: {id, userId: request.user.id} })
+
+    response.status(200).send(`Resource deleted with ID: ${id}`)
+  } catch (e) {
+    next(e)
+  }
 }

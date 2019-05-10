@@ -1,59 +1,58 @@
-// Get Database pool
+// Get Database models
 const models = require('../models')
 
-// // Get all area
+// // Get all resource
 exports.getResources = async (request, response, next) => {
   try {
-    const results = await models.Resource.findAll({ where: {userId: request.user.sub}, order: [['zIndex', 'DESC']] })
+    const results = await models.Resource.findAll({ where: {userId: request.user.id}, order: [['zIndex', 'DESC']] })
     response.status(200).json(results)
   } catch (e) {
     next(e)
   }
 }
 
-// Get single area by ID
+// Get single resource by ID
 exports.getResourceById = async (request, response, next) => {
   const id = parseInt(request.params.id)
   try {
-    const results = await models.Resource.findOne({ where: {id, userId: request.user.sub} })
+    const results = await models.Resource.findOne({ where: {id, userId: request.user.id} })
     response.status(200).json(results)
   } catch (e) {
     next(e)
   }
 }
 
-// Add a new area
+// Add a new resource
 exports.addResource = async (request, response, next) => {
   try {
     const { id, opacity, time, zIndex } = request.body
-    const results = await models.Resource.create({ id, opacity, time, zIndex, userId: request.user.sub })
+    const results = await models.Resource.create({ id, opacity, time, zIndex, userId: request.user.id })
     response.status(200).json(results)
   } catch (e) {
     next(e)
   }
 }
 
-// // Update an existing area
+// // Update an existing resource
 exports.updateResource = async (request, response, next) => {
   try {
     const id = parseInt(request.params.id)
     const { opacity, time, zIndex } = request.body
 
-    const resource = await models.Resource.findOne({ where: {id, userId: request.user.sub} })
-    const results = await resource.update({ id, opacity, time, zIndex })
+    const [resource] = await models.Resource.findOrCreate({ where: { id, userId: request.user.id }, defaults: { opacity, time, zIndex } })
 
-    response.status(200).send(results)
+    response.status(200).send(resource.get(0))
   } catch (e) {
     next(e)
   }
 }
 
-// // Delete a area
+// // Delete a resource
 exports.deleteResource = async (request, response, next) => {
   try {
     const id = parseInt(request.params.id)
 
-    await models.Resource.destroy({ where: {id, userId: request.user.sub} })
+    await models.Resource.destroy({ where: {id, userId: request.user.id} })
 
     response.status(200).send(`Resource deleted with ID: ${id}`)
   } catch (e) {

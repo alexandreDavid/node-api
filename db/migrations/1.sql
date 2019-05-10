@@ -1,3 +1,6 @@
+-- DEPRECATED THE MODELS AUTOMATICALLY UPDATE THE DB --
+
+
 CREATE DATABASE dfms_users
     WITH 
     OWNER = postgres
@@ -168,18 +171,18 @@ INSERT INTO public.setting_value(setting_id, key, label, isdefault) VALUES
     ('stormWarning', 'true', 'ON', false),
     ('stormWarning', false, 'OFF', true);
 
--- Table: public.setting_value
+-- Table: public.setting_user
 
--- DROP TABLE public.setting_value;
+-- DROP TABLE public.setting_user;
 
-CREATE TABLE public.setting_value
+CREATE TABLE public.setting_user
 (
     setting_id character varying COLLATE pg_catalog."default" NOT NULL,
+    user_id character varying COLLATE pg_catalog."default" NOT NULL,
     key character varying COLLATE pg_catalog."default" NOT NULL,
-    label character varying COLLATE pg_catalog."default",
-    CONSTRAINT setting_value_pkey PRIMARY KEY (setting_id, key),
-    CONSTRAINT setting_id_fkey FOREIGN KEY (setting_id)
-        REFERENCES public.setting (id) MATCH SIMPLE
+    CONSTRAINT setting_user_pkey PRIMARY KEY (setting_id, user_id),
+    CONSTRAINT setting_user_key_fkey FOREIGN KEY (key, setting_id)
+        REFERENCES public.setting_value (key, setting_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
@@ -188,5 +191,5 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.setting_value
+ALTER TABLE public.setting_user
     OWNER to postgres;

@@ -12,8 +12,7 @@ module.exports = (sequelize) => {
     userId: {
       type: Sequelize.STRING,
       allowNull: false,
-      primaryKey: true,
-      field: 'user_id'
+      primaryKey: true
     },
     opacity: {
       type: Sequelize.INTEGER
@@ -22,8 +21,7 @@ module.exports = (sequelize) => {
       type: Sequelize.STRING
     },
     zIndex: {
-      type: Sequelize.INTEGER,
-      field: 'z_index'
+      type: Sequelize.INTEGER
     }
   }, {
     sequelize,
