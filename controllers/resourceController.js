@@ -15,7 +15,7 @@ exports.getResources = async (request, response, next) => {
 exports.getResourceById = async (request, response, next) => {
   const id = parseInt(request.params.id)
   try {
-    const results = await models.Resource.findOne({ where: {id, userId: request.user.id} })
+    const results = await models.Resource.findOne({ where: { id, userId: request.user.id } })
     response.status(200).json(results)
   } catch (e) {
     next(e)
@@ -39,9 +39,9 @@ exports.updateResource = async (request, response, next) => {
     const id = parseInt(request.params.id)
     const { opacity, time, zIndex } = request.body
 
-    const [resource] = await models.Resource.findOrCreate({ where: { id, userId: request.user.id }, defaults: { opacity, time, zIndex } })
+    await models.Resource.upsert({ id, userId: request.user.id, opacity, time, zIndex })
 
-    response.status(200).send(resource.get(0))
+    response.status(200).send(`Resource saved with ID: ${id}`)
   } catch (e) {
     next(e)
   }
