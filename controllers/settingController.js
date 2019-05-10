@@ -16,7 +16,7 @@ exports.getSettings = async (_request, response, next) => {
 exports.getSettingsForUser = async (request, response, next) => {
   try {
     const results = await models.UserSetting.findAll({ where: { userId: request.user.id }, attributes: { exclude: ['userId'] }})
-    response.status(400).json('Bad request')
+    response.status(200).json(results)
   } catch (e) {
     next(e)
   }
