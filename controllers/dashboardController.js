@@ -4,7 +4,7 @@ const models = require('../models')
 // // Get all dashboards
 exports.getDashboards = async (request, response, next) => {
   try {
-    const dashboards = await models.Dashboard.findAll({ where: { userId: request.user.id }, order: [['id']] })
+    const dashboards = await models.Dashboard.findAll({ where: { userId: request.user.id }, order: [['id']] , attributes: { exclude: ['userId'] }})
     response.status(200).json(dashboards)
   } catch (e) {
     next(e)

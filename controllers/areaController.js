@@ -49,7 +49,7 @@ exports.updateArea = async (request, response, next) => {
 }
 
 // // Delete a area
-exports.deleteArea = async (request, response) => {
+exports.deleteArea = async (request, response, next) => {
   try {
     const id = parseInt(request.params.id)
 
