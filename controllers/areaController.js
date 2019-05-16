@@ -4,7 +4,7 @@ const models = require('../models')
 // // Get all area
 exports.getAreas = async (request, response, next) => {
   try {
-    const results = await models.Area.findAll({ where: { userId: request.user.id }, attributes: { exclude: ['userId'] }})
+    const results = await models.Area.findAll({ where: { userId: request.user.sub }, attributes: { exclude: ['userId'] }})
     response.status(200).json(results)
   } catch (e) {
     next(e)
@@ -15,7 +15,7 @@ exports.getAreas = async (request, response, next) => {
 exports.getAreaById = async (request, response, next) => {
   const id = parseInt(request.params.id)
   try {
-    const results = await models.Area.findOne({ where: {id, userId: request.user.id}, attributes: { exclude: ['userId'] }})
+    const results = await models.Area.findOne({ where: {id, userId: request.user.sub}, attributes: { exclude: ['userId'] }})
     response.status(200).json(results)
   } catch (e) {
     next(e)
@@ -26,8 +26,8 @@ exports.getAreaById = async (request, response, next) => {
 exports.addArea = async (request, response, next) => {
   try {
     const { name, type, geom, idArea } = request.body
-    const area = await models.Area.create({ name, type, geom, idArea, userId: request.user.id })
-    response.status(200).json(await models.Area.findOne({ where: {id: area.id, userId: request.user.id}, attributes: { exclude: ['userId'] }}))
+    const area = await models.Area.create({ name, type, geom, idArea, userId: request.user.sub })
+    response.status(200).json(await models.Area.findOne({ where: {id: area.id, userId: request.user.sub}, attributes: { exclude: ['userId'] }}))
   } catch (e) {
     next(e)
   }
@@ -39,7 +39,7 @@ exports.updateArea = async (request, response, next) => {
     const id = parseInt(request.params.id)
     const { name, type, geom, idArea } = request.body
 
-    const area = await models.Area.findOne({ where: {id, userId: request.user.id}, attributes: { exclude: ['userId'] }})
+    const area = await models.Area.findOne({ where: {id, userId: request.user.sub}, attributes: { exclude: ['userId'] }})
     const results = await area.update({ name, type, geom, idArea })
 
     response.status(200).send(results)
@@ -53,7 +53,7 @@ exports.deleteArea = async (request, response, next) => {
   try {
     const id = parseInt(request.params.id)
 
-    await models.Area.destroy({ where: {id, userId: request.user.id} })
+    await models.Area.destroy({ where: {id, userId: request.user.sub} })
 
     response.status(200).send(`Resource deleted with ID: ${id}`)
   } catch (e) {

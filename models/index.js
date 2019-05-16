@@ -13,6 +13,7 @@ db.Sequelize = Sequelize;
 db.Area = require('./Area')(sequelize)
 db.Basemap = require('./Basemap')(sequelize)
 db.Dashboard = require('./Dashboard')(sequelize)
+db.Organisation = require('./Organisation')(sequelize)
 db.Resource = require('./Resource')(sequelize)
 db.Setting = require('./Setting')(sequelize)
 db.SettingValue = require('./SettingValue')(sequelize, db.Setting)
@@ -26,5 +27,6 @@ db.User.hasMany(db.Area);
 db.Resource.belongsTo(db.User);
 db.SettingValue.belongsTo(db.Setting);
 db.Setting.hasMany(db.SettingValue, { as: 'values' });
+db.Organisation.hasMany(db.User);
 
 module.exports = db;

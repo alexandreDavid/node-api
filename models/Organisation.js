@@ -4,17 +4,12 @@ module.exports = (sequelize) => {
   class Organisation extends Sequelize.Model {}
   Organisation.init({
     // attributes
-    id: {
-      type: Sequelize.INTEGER,
-      allowNull: false,
-      primaryKey: true
-    },
     name: {
       type: Sequelize.STRING,
       allowNull: false
     },
-    link: {
-      type: Sequelize.INTEGER
+    hash: {
+      type: Sequelize.STRING
     }
   }, {
     sequelize,

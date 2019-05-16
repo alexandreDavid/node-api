@@ -2,6 +2,7 @@
  * Read the authorization token and call the Auth0 API to have the user
  *
  */
+// TODO: replace by axios
 const request = require('request')
 
 module.exports = function () {

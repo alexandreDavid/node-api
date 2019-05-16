@@ -14,7 +14,7 @@ exports.getBasemaps = async (request, response, next) => {
 // Get the basemap of the user
 exports.getBasemap = async (request, response, next) => {
   try {
-    let user = await models.User.findOne({ where: { id: request.user.id }, include: [ models.Basemap ] })
+    let user = await models.User.findOne({ where: { id: request.user.sub }, include: [ models.Basemap ] })
     // user = user.get(0)
 
     if (!user.basemap) {
@@ -33,7 +33,7 @@ exports.getBasemap = async (request, response, next) => {
 exports.updateBasemap = async (request, response, next) => {
   try {
     const id = parseInt(request.params.id)
-    let user = await models.User.findOne({ where: { id: request.user.id }})
+    let user = await models.User.findOne({ where: { id: request.user.sub }})
     user.basemapId = parseInt(request.params.id)
     await user.save({fields: ['basemapId']})
 

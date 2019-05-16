@@ -1,6 +1,9 @@
+// TODO: replace by axios
 const request = require('request')
 const models = require('../models')
 var jwtDecode = require('jwt-decode');
+const crypto = require('crypto');
+const managementApi = require('../middleware/managementApi');
 
 function responseHandler (resp, err, data, cb) {
   if (err) throw new Error(err);
@@ -96,15 +99,22 @@ exports.login = async (req, response) => {
     json: true };
 
   request.post(options, function (error, _resp, body) {
-    responseHandler(response, error, body, () => {
+    responseHandler(response, error, body, async () => {
       let expiresAt = JSON.stringify(
         body.expires_in * 1000 + new Date().getTime()
       )
 
       // If the user doesn't exist in the DB, we create him
       const decoded = jwtDecode(body.id_token)
-      models.User.findOrCreate({ where: { id: decoded.sub }})
-  
+      const user = await models.User.findOne({ where: { id: decoded.sub }})
+
+      if (!user) {
+        const authUser = await managementApi.getUser(decoded.sub)
+        // We have to get the organisation name from the Auth0 DB
+        const organisation = await models.Organisation.create({ hash: crypto.createHash('sha256').digest('hex'), name: authUser.user_metadata.organisation })
+        models.User.create({ id: authUser.user_id, name: authUser.user_metadata.name, position: authUser.user_metadata.position, role: 'ADMIN', organisationId: organisation.id })
+      }
+
       return response.status(200).send({
         idToken: body.id_token,
         expiresAt: expiresAt
@@ -132,23 +142,44 @@ exports.changePassword = async (req, response) => {
 }
 
 exports.signup = async (req, response) => {
-  const { email, password, metadata } = req.body
+  const { email, password, metadata, hash } = req.body
+
+  let organisation
+  let role
+  if (hash) {
+    organisation = await models.Organisation.findOne({ where: { hash }})
+    role = 'GUEST'
+  } else {
+    organisation = await models.Organisation.create({ hash: crypto.createHash('sha256').digest('hex'), name: metadata.organisation })
+    role = 'ADMIN'
+  }
   var options = {
     url: `https://${process.env.AUTH0_DOMAIN}/dbconnections/signup`,
     headers: { 'content-type': 'application/json' },
-    body: 
-    { email,
+    body: {
+      email,
       password,
       user_metadata: metadata,
       client_id: process.env.AUTH0_CLIENT_ID,
-      connection: 'Username-Password-Authentication'},
+      connection: 'Username-Password-Authentication'
+    },
     json: true };
 
   request.post(options, function (error, _resp, body) {
     responseHandler(response, error, body, () => {
       // save in our DB
-      models.User.create({ id: `auth0|${body._id}` })
+      models.User.create({ id: `auth0|${body._id}`, name: metadata.name, position: metadata.position, role, organisationId: organisation.id })
       return response.status(200).send(body);
     })
   });
+}
+
+exports.isAdmin = async (request, response, next) => {
+  try {
+    // check if the couple id / value valids
+    const user = await models.User.findOne({ where: { id: request.user.sub } })
+    response.status(200).send(user.role === 'ADMIN')
+  } catch (e) {
+    next(e)
+  }
 }

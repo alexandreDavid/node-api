@@ -8,6 +8,15 @@ module.exports = (sequelize) => {
       type: Sequelize.STRING,
       allowNull: false,
       primaryKey: true
+    },
+    name: {
+      type: Sequelize.STRING
+    },
+    position: {
+      type: Sequelize.STRING
+    },
+    role: {
+      type: Sequelize.STRING
     }
   }, {
     sequelize,

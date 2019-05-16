@@ -1,21 +1,22 @@
-// Get Database pool
+// Get Database models
 const models = require('../models')
 
-// // Get all area
+// // Get the user's organisation
 exports.getOrganisation = async (request, response, next) => {
   try {
-    const results = await models.Organisation.findByPk({ where: {userId: request.user.sub}, order: [['zIndex', 'DESC']] })
+    const user = await models.User.findOne({ where: { id: request.user.sub }})
+    const results = await models.Organisation.findByPk(user.organisationId)
     response.status(200).json(results)
   } catch (e) {
     next(e)
   }
 }
 
-// Add a new area
-exports.add2Organisation = async (request, response, next) => {
+// // Get an organisation by hash
+exports.getOrganisationByHash = async (request, response, next) => {
   try {
-    const { id, opacity, time, zIndex } = request.body
-    const results = await models.Resource.create({ id, opacity, time, zIndex, userId: request.user.sub })
+    const hash = request.params.hash
+    const results = await models.Organisation.findOne({ where: { hash }})
     response.status(200).json(results)
   } catch (e) {
     next(e)
@@ -25,11 +26,11 @@ exports.add2Organisation = async (request, response, next) => {
 // // Update an existing area
 exports.updateOrganisation = async (request, response, next) => {
   try {
-    const id = parseInt(request.params.id)
-    const { opacity, time, zIndex } = request.body
+    const { name } = request.body
 
-    const resource = await models.Resource.findOne({ where: {id, userId: request.user.sub} })
-    const results = await resource.update({ id, opacity, time, zIndex })
+    const user = await models.User.findOne({ where: { id: request.user.sub }})
+    const organisation = await models.Organisation.findByPk(user.organisationId)
+    const results = await organisation.update({ name })
 
     response.status(200).send(results)
   } catch (e) {
@@ -39,8 +40,8 @@ exports.updateOrganisation = async (request, response, next) => {
 
 exports.getOrganisationUsers = async (request, response, next) => {
   try {
-    const { id, opacity, time, zIndex } = request.body
-    const results = await models.Resource.create({ id, opacity, time, zIndex, userId: request.user.sub })
+    const user = await models.User.findOne({ where: { id: request.user.sub } })
+    const results = await models.User.findAll({ where: { organisationId: user.organisationId }})
     response.status(200).json(results)
   } catch (e) {
     next(e)

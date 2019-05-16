@@ -15,7 +15,7 @@ exports.getSettings = async (_request, response, next) => {
 // Get the settings of the user
 exports.getSettingsForUser = async (request, response, next) => {
   try {
-    const results = await models.UserSetting.findAll({ where: { userId: request.user.id }, attributes: { exclude: ['userId'] }})
+    const results = await models.UserSetting.findAll({ where: { userId: request.user.sub }, attributes: { exclude: ['userId'] }})
     response.status(200).json(results)
   } catch (e) {
     next(e)
@@ -33,7 +33,7 @@ exports.updateSetting = async (request, response, next) => {
     if (!value) {
       return next({ status: 401, message: 'Bad request', stack: `id and value are not a valid couple` })
     }
-    await models.UserSetting.upsert({ settingId: id, userId: request.user.id, key }, { returning: true })
+    await models.UserSetting.upsert({ settingId: id, userId: request.user.sub, key }, { returning: true })
     response.status(200).send(`Setting saved with ID: ${id}`)
   } catch (e) {
     next(e)

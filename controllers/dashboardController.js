@@ -4,7 +4,7 @@ const models = require('../models')
 // // Get all dashboards
 exports.getDashboards = async (request, response, next) => {
   try {
-    const dashboards = await models.Dashboard.findAll({ where: { userId: request.user.id }, order: [['id']] , attributes: { exclude: ['userId'] }})
+    const dashboards = await models.Dashboard.findAll({ where: { userId: request.user.sub }, order: [['id']] , attributes: { exclude: ['userId'] }})
     response.status(200).json(dashboards)
   } catch (e) {
     next(e)
@@ -16,7 +16,7 @@ exports.getDashboardById = async (request, response, next) => {
   const id = parseInt(request.params.id)
 
   try {
-    const dashboard = await models.Dashboard.findOne({ where: { id, userId: request.user.id }, attributes: { exclude: ['userId'] }})
+    const dashboard = await models.Dashboard.findOne({ where: { id, userId: request.user.sub }, attributes: { exclude: ['userId'] }})
     response.status(200).json(dashboard)
   } catch (e) {
     next(e)
@@ -27,7 +27,7 @@ exports.getDashboardById = async (request, response, next) => {
 exports.addDashboard = async (request, response, next) => {
   try {
     const { title, description, layout, widgets } = request.body
-    const dashboard = await models.Dashboard.create({ title, description, layout, widgets, userId: request.user.id }, { attributes: { exclude: ['userId'] }})
+    const dashboard = await models.Dashboard.create({ title, description, layout, widgets, userId: request.user.sub }, { attributes: { exclude: ['userId'] }})
     response.status(201).json(dashboard)
   } catch (e) {
     next(e)
@@ -40,7 +40,7 @@ exports.updateDashboard = async (request, response, next) => {
     const id = parseInt(request.params.id)
     const { title, description, layout, widgets } = request.body
 
-    const dashboard = await models.Dashboard.findOne({ where: {id, userId: request.user.id}, attributes: { exclude: ['userId'] }})
+    const dashboard = await models.Dashboard.findOne({ where: { id, userId: request.user.sub }, attributes: { exclude: ['userId'] }})
     const results = await dashboard.update({ title, description, layout, widgets })
 
     response.status(200).send(results)
@@ -54,7 +54,7 @@ exports.deleteDashboard = async (request, response, next) => {
   try {
     const id = parseInt(request.params.id)
 
-    await models.Area.destroy({ where: {id, userId: request.user.id} })
+    await models.Area.destroy({ where: { id, userId: request.user.sub } })
 
     response.status(200).send(`Resource deleted with ID: ${id}`)
   } catch (e) {
