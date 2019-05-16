@@ -112,7 +112,7 @@ exports.login = async (req, response) => {
         const authUser = await managementApi.getUser(decoded.sub)
         // We have to get the organisation name from the Auth0 DB
         const organisation = await models.Organisation.create({ hash: crypto.createHash('sha256').digest('hex'), name: authUser.user_metadata.organisation })
-        models.User.create({ id: authUser.user_id, name: authUser.user_metadata.name, position: authUser.user_metadata.position, role: 'ADMIN', organisationId: organisation.id })
+        models.User.create({ id: authUser.user_id, name: authUser.user_metadata.name, email: authUser.user_metadata.email, position: authUser.user_metadata.position, role: 'ADMIN', organisationId: organisation.id })
       }
 
       return response.status(200).send({
@@ -168,7 +168,7 @@ exports.signup = async (req, response) => {
   request.post(options, function (error, _resp, body) {
     responseHandler(response, error, body, () => {
       // save in our DB
-      models.User.create({ id: `auth0|${body._id}`, name: metadata.name, position: metadata.position, role, organisationId: organisation.id })
+      models.User.create({ id: `auth0|${body._id}`, name: metadata.name, position: metadata.position, email, role, organisationId: organisation.id })
       return response.status(200).send(body);
     })
   });

@@ -12,6 +12,9 @@ module.exports = (sequelize) => {
     name: {
       type: Sequelize.STRING
     },
+    email: {
+      type: Sequelize.STRING
+    },
     position: {
       type: Sequelize.STRING
     },
