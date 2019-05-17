@@ -15,6 +15,9 @@ module.exports = (sequelize) => {
     },
     widgets: {
       type: Sequelize.ARRAY(Sequelize.JSON)
+    },
+    shared: {
+      type: Sequelize.BOOLEAN
     }
   }, {
     sequelize,
