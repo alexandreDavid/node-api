@@ -111,7 +111,7 @@ exports.login = async (req, response) => {
         const authUser = await managementApi.getUser(decoded.sub)
         // We have to get the organisation name from the Auth0 DB
         const organisation = await models.Organisation.create({ hash: crypto.createHash('sha256').digest('hex'), name: authUser.user_metadata.organisation })
-        models.User.create({ id: authUser.user_id, name: authUser.user_metadata.name, email: authUser.user_metadata.email, position: authUser.user_metadata.position, role: 'ADMIN', organisationId: organisation.id })
+        models.User.create({ id: authUser.user_id, name: authUser.user_metadata.name, email: authUser.email, position: authUser.user_metadata.position, role: 'ADMIN', organisationId: organisation.id })
       }
 
       return response.status(200).send({
