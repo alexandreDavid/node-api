@@ -94,7 +94,6 @@ exports.login = async (req, response) => {
       audience: `https://${process.env.AUTH0_DOMAIN}/userinfo`,
       scope: 'openid',
       client_id: process.env.AUTH0_CLIENT_ID,
-      client_secret: process.env.AUTH0_CLIENT_SECRET,
       realm: 'Username-Password-Authentication'},
     json: true };
 
