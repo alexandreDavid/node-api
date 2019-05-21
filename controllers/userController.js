@@ -99,10 +99,6 @@ exports.login = async (req, response) => {
 
   request.post(options, function (error, _resp, body) {
     responseHandler(response, error, body, async () => {
-      let expiresAt = JSON.stringify(
-        body.expires_in * 1000 + new Date().getTime()
-      )
-
       // If the user doesn't exist in the DB, we create him
       const decoded = jwtDecode(body.id_token)
       const user = await models.User.findOne({ where: { id: decoded.sub }})
@@ -116,7 +112,7 @@ exports.login = async (req, response) => {
 
       return response.status(200).send({
         idToken: body.id_token,
-        expiresAt: expiresAt
+        expiresAt: decoded.exp * 1000
       });
     })
   });
