@@ -14,5 +14,6 @@ router.use('/organisation', require('./organisation'))
 router.use('/resources', require('./resources'))
 router.use('/settings', require('./settings'))
 router.use('/user', require('./user'))
+router.use('/users', require('./users'))
 
 module.exports = router;

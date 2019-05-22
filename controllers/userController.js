@@ -94,6 +94,7 @@ exports.login = async (req, response) => {
       audience: `https://${process.env.AUTH0_DOMAIN}/userinfo`,
       scope: 'openid',
       client_id: process.env.AUTH0_CLIENT_ID,
+      client_secret: process.env.AUTH0_CLIENT_SECRET,
       realm: 'Username-Password-Authentication'},
     json: true };
 
@@ -127,6 +128,7 @@ exports.changePassword = async (req, response) => {
     body: 
     { email,
       client_id: process.env.AUTH0_CLIENT_ID,
+      client_secret: process.env.AUTH0_CLIENT_SECRET,
       connection: 'Username-Password-Authentication'},
     json: true };
 
@@ -157,6 +159,7 @@ exports.signup = async (req, response) => {
       password,
       user_metadata: metadata,
       client_id: process.env.AUTH0_CLIENT_ID,
+      client_secret: process.env.AUTH0_CLIENT_SECRET,
       connection: 'Username-Password-Authentication'
     },
     json: true };
@@ -172,9 +175,19 @@ exports.signup = async (req, response) => {
 
 exports.isAdmin = async (request, response, next) => {
   try {
-    // check if the couple id / value valids
+    // check if the role is admin
     const user = await models.User.findOne({ where: { id: request.user.sub } })
-    response.status(200).send(user.role === 'ADMIN')
+    response.status(200).send(['ADMIN', 'SUPERADMIN'].includes(user.role))
+  } catch (e) {
+    next(e)
+  }
+}
+
+exports.isSuperAdmin = async (request, response, next) => {
+  try {
+    // check if the role is super admin
+    const user = await models.User.findOne({ where: { id: request.user.sub } })
+    response.status(200).send(user.role === 'SUPERADMIN')
   } catch (e) {
     next(e)
   }
