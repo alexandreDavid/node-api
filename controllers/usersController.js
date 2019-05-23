@@ -1,5 +1,6 @@
 const managementApi = require('../middleware/managementApi');
 const { Parser } = require('json2csv');
+const models = require('../models')
 
 exports.getAllUsers = async (request, response, next) => {
   try {
@@ -31,6 +32,22 @@ exports.getUsersCsv = async (req, response, next) => {
     }));
     response.attachment('dfms-users.csv');
     response.status(200).send(csv);
+  } catch (e) {
+    next(e)
+  }
+}
+
+exports.patchUser = async (request, response, next) => {
+  try {
+    const { role } = request.body
+
+    let user = await models.User.findOne({ where: { id: request.params.id }})
+
+    if (typeof role !== undefined) {
+      user = await user.update({ role })
+    }
+
+    response.status(200).send(user)
   } catch (e) {
     next(e)
   }

@@ -6,5 +6,6 @@ const checkRights = require('../middleware/checkRights');
 
 router.get('/csv', checkJwt, checkRights.isSuperAdmin, usersController.getUsersCsv)
 router.get('/', checkJwt, checkRights.isSuperAdmin, usersController.getAllUsers)
+router.patch('/:id', checkJwt, checkRights.isAdmin, usersController.patchUser)
 
 module.exports = router
