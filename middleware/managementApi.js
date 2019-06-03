@@ -22,9 +22,31 @@ exports.getUser = async (id) => {
   return response.data
 }
 
+exports.setUser = async (id, obj) => {
+  const token = await exports.getToken()
+  const response = await axios.patch(`https://${process.env.AUTH0_DOMAIN}/api/v2/users/${id}`, obj, {
+    headers: {
+      'content-type': 'application/json',
+      authorization: `${token.token_type} ${token.access_token}`
+    }
+  });
+  return response.data
+}
+
 exports.getUsers = async () => {
   const token = await exports.getToken()
   const response = await axios(`https://${process.env.AUTH0_DOMAIN}/api/v2/users`, {
+    headers: {
+      'content-type': 'application/json',
+      authorization: `${token.token_type} ${token.access_token}`
+    }
+  });
+  return response.data
+}
+
+exports.deleteUser = async (id) => {
+  const token = await exports.getToken()
+  const response = await axios.delete(`https://${process.env.AUTH0_DOMAIN}/api/v2/users/${id}`, {
     headers: {
       'content-type': 'application/json',
       authorization: `${token.token_type} ${token.access_token}`

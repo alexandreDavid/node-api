@@ -120,7 +120,7 @@ exports.login = async (req, response) => {
   });
 }
 
-exports.changePassword = async (req, response) => {
+exports.forgotPassword = async (req, response) => {
   const { email } = req.body
   var options = {
     url: `https://${process.env.AUTH0_DOMAIN}/dbconnections/change_password`,
@@ -137,6 +137,47 @@ exports.changePassword = async (req, response) => {
       return response.status(200).send(body);
     })
   });
+}
+
+exports.changePassword = async (req, response, next) => {
+  const { current, password, passwordConfirmation } = req.body
+  // We check the passwords are equal
+  if (password !== passwordConfirmation) {
+    return response.status(400).send({description: 'Passwords don\'t match'})
+  }
+  // We check the current one is correct
+  const user = await models.User.findOne({ where: { id: req.user.sub }})
+  try {
+    var options = {
+      url: `https://${process.env.AUTH0_DOMAIN}/oauth/token`,
+      headers: { 'content-type': 'application/json' },
+      body: 
+      { grant_type: 'http://auth0.com/oauth/grant-type/password-realm',
+        username: user.email,
+        password: current,
+        audience: `https://${process.env.AUTH0_DOMAIN}/userinfo`,
+        scope: 'openid',
+        client_id: process.env.AUTH0_CLIENT_ID,
+        client_secret: process.env.AUTH0_CLIENT_SECRET,
+        realm: 'Username-Password-Authentication'},
+      json: true };
+  
+    request.post(options, function (error, _resp, body) {
+      responseHandler(response, error, body, async () => {
+        
+        try {
+          await managementApi.setUser(req.user.sub, {
+            password
+          })
+          return response.status(200).send('Password successfully changed');
+        } catch (error) {
+          return responseHandler(response, false, error.response.data)
+        }
+      })
+    })
+  } catch (e) {
+    next(e)
+  }
 }
 
 exports.signup = async (req, response) => {
@@ -188,6 +229,52 @@ exports.isSuperAdmin = async (request, response, next) => {
     // check if the role is super admin
     const user = await models.User.findOne({ where: { id: request.user.sub } })
     response.status(200).send(user.role === 'SUPERADMIN')
+  } catch (e) {
+    next(e)
+  }
+}
+
+exports.getUser = async (request, response, next) => {
+  try {
+    let user = await models.User.findOne({ where: { id: request.user.sub } })
+    const authUser = await managementApi.getUser(request.user.sub)
+    user.picture = authUser.picture
+    response.status(200).send({
+      email: user.email,
+      name: user.name,
+      picture: authUser.picture,
+      position: user.position
+    })
+  } catch (e) {
+    next(e)
+  }
+}
+
+exports.updateUser = async (request, response, next) => {
+  try {
+    let user = await models.User.findOne({ where: { id: request.user.sub } })
+    const { email, name, position } = request.body
+    user = await user.update({ email, name, position })
+    await managementApi.setUser(user.id, {
+      email,
+      name,
+      user_metadata: {
+        name,
+        position
+      }
+    })
+    response.status(200).send('User saved')
+  } catch (e) {
+    next(e)
+  }
+}
+
+exports.deleteUser = async (request, response, next) => {
+  try {
+    let user = await models.User.findOne({ where: { id: request.user.sub } })
+    await managementApi.deleteUser(user.id)
+    await user.destroy()
+    response.status(200).send('User deleted')
   } catch (e) {
     next(e)
   }
