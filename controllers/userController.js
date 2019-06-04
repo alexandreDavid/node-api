@@ -189,7 +189,7 @@ exports.signup = async (req, response) => {
     organisation = await models.Organisation.findOne({ where: { hash }})
     role = 'GUEST'
   } else {
-    organisation = await models.Organisation.create({ hash: crypto.createHash('sha256').digest('hex'), name: metadata.organisation })
+    organisation = await models.Organisation.create({ hash: crypto.randomBytes(20).toString('hex'), name: metadata.organisation })
     role = 'ADMIN'
   }
   var options = {
