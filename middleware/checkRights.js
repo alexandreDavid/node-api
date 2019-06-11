@@ -17,5 +17,5 @@ exports.isAdmin = async (request, response, next) => {
 }
 
 exports.isSuperAdmin = async (request, response, next) => {
-  await hasRole(request, response, next, ['ADMIN'])
+  await hasRole(request, response, next, ['SUPERADMIN'])
 }
